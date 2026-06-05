@@ -1,0 +1,27 @@
+{
+    "buildCommand": "npm run build",
+    "outputDirectory": ".next",
+    "framework": "nextjs",
+    "env": {
+        "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
+        "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
+        "GOOGLE_DRIVE_API_KEY": "@google-drive-api-key",
+        "GOOGLE_DRIVE_FOLDER_ID": "@google-drive-folder-id",
+        "NEXT_PUBLIC_SITE_URL": "@site-url"
+    },
+    "regions": [
+        "sin1"
+    ],
+    "headers": [
+        {
+            "source": "/api/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "s-maxage=60, stale-while-revalidate"
+                }
+            ]
+        }
+    ]
+}
