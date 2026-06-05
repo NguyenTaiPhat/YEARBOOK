@@ -84,19 +84,3 @@ export const STICKY_COLORS = [
   { bg: "#F3E5F5", border: "#C090C0" },
   { bg: "#FFF8F1", border: "#E7D3BE" },
 ];
-
-// Placeholder images from Unsplash for demo
-export const PLACEHOLDER_PHOTOS = [
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=80",
-  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=80",
-  "https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&q=80",
-  "https://images.unsplash.com/photo-1582561424760-0321d75e81fa?w=600&q=80",
-  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&q=80",
-  "https://images.unsplash.com/photo-1529390079861-591de354faf5?w=600&q=80",
-  "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80",
-  "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=600&q=80",
-  "https://images.unsplash.com/photo-1588072432904-823af1e7ac1f?w=600&q=80",
-  "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?w=600&q=80",
-  "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&q=80",
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80",
-];
