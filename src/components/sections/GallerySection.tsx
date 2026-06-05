@@ -3,7 +3,10 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, X, Download, ChevronLeft, ChevronRight, ZoomIn, Share2 } from "@/components/ui/Icons";
-import { PLACEHOLDER_PHOTOS, getVisitorId } from "@/lib/utils";
+import { getVisitorId } from "@/lib/utils";
+
+const IMAGE_ERROR_SRC =
+  "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Crect width='600' height='600' fill='%23f5f5f5'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='28' fill='%23999'%3EImage unavailable%3C/text%3E%3C/svg%3E";
 
 interface Photo {
   id: string;
@@ -58,7 +61,7 @@ function ImageCard({
             console.error('❌ Image failed:', photo.id, photo.image_url);
             setError(true);
             const target = e.target as HTMLImageElement;
-            target.src = PLACEHOLDER_PHOTOS[index % PLACEHOLDER_PHOTOS.length];
+            target.src = IMAGE_ERROR_SRC;
           }}
         />
 
@@ -198,7 +201,7 @@ function Lightbox({
             className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = PLACEHOLDER_PHOTOS[0];
+              target.src = IMAGE_ERROR_SRC;
             }}
           />
 
@@ -255,28 +258,13 @@ export function GallerySection() {
           console.log('🔗 Sample URL:', data.photos[0].image_url);
           setPhotos(data.photos);
         } else {
-          console.warn('⚠️ Using placeholders');
-          setPhotos(
-            PLACEHOLDER_PHOTOS.map((url, i) => ({
-              id: `p${i}`,
-              image_url: url,
-              caption: `Memory ${i + 1}`,
-              heart_count: Math.floor(Math.random() * 30),
-            }))
-          );
+          setPhotos([]);
         }
         setLoading(false);
       })
       .catch((err) => {
         console.error('❌ Fetch failed:', err);
-        setPhotos(
-          PLACEHOLDER_PHOTOS.map((url, i) => ({
-            id: `p${i}`,
-            image_url: url,
-            caption: `Memory ${i + 1}`,
-            heart_count: Math.floor(Math.random() * 30),
-          }))
-        );
+        setPhotos([]);
         setLoading(false);
       });
   }, []);
