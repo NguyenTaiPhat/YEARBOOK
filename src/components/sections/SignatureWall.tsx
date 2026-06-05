@@ -45,18 +45,7 @@ function darkenHex(hex: string, amount = 0.82) {
 }
 
 const DEMO_SIGNATURES: Signature[] = [
-  { id: "1", author_name: "Minh Châu", note: "Nhớ mãi 12A19! 💛", position_x: 8, position_y: 15, color: "#B89367", created_at: "" },
-  { id: "2", author_name: "Hoàng Anh", note: "Class forever ✨", position_x: 32, position_y: 8, color: "#4A6741", created_at: "" },
-  { id: "3", author_name: "Thanh Hà", note: "Yêu tụi mình ♡", position_x: 58, position_y: 18, color: "#7B4A4A", created_at: "" },
-  { id: "4", author_name: "Đức Minh", note: "12A19 BEST!", position_x: 75, position_y: 10, color: "#4A5F7B", created_at: "" },
-  { id: "5", author_name: "Phương Linh", note: "Miss u all 🌸", position_x: 12, position_y: 42, color: "#7B4A7B", created_at: "" },
-  { id: "6", author_name: "Quang Huy", note: "Best years!", position_x: 38, position_y: 35, color: "#3B3028", created_at: "" },
-  { id: "7", author_name: "Thu Trang", note: "❤️", position_x: 62, position_y: 48, color: "#B89367", created_at: "" },
-  { id: "8", author_name: "Bảo Long", note: "Mãi nhớ nhau!", position_x: 82, position_y: 38, color: "#4A6741", created_at: "" },
-  { id: "9", author_name: "Kim Ngân", note: "Luôn nhớ ✿", position_x: 18, position_y: 65, color: "#7B6A5A", created_at: "" },
-  { id: "10", author_name: "Trọng Nghĩa", note: "Good luck!", position_x: 48, position_y: 60, color: "#4A5F7B", created_at: "" },
-  { id: "11", author_name: "Hải Yến", note: "Forever 12A19 🌟", position_x: 70, position_y: 68, color: "#B89367", created_at: "" },
-  { id: "12", author_name: "Nam Anh", note: "💪", position_x: 8, position_y: 78, color: "#3B3028", created_at: "" },
+  { id: "1", author_name: "Tài Phát", note: "Ký tên cho tui ở đâyy", position_x: 8, position_y: 15, color: "#14842f", created_at: "" },
 ];
 
 function SignatureItem({
