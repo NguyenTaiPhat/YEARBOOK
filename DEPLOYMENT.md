@@ -40,7 +40,7 @@ git add .
 git commit -m "Initial commit - Ready for Vercel deployment"
 
 # Add remote repository
-git remote add origin https://github.com/your-username/our-memories.git
+git remote add origin https://github.com/NguyenTaiPhat/YEARBOOK.git
 
 # Push
 git push -u origin main
