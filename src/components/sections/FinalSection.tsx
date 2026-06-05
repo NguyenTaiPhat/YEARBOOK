@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { PLACEHOLDER_PHOTOS } from "@/lib/utils";
 
 /* ─── Ambient glow orb ─────────────────────────────────────────────────────── */
 function GlowOrb({
@@ -114,7 +113,7 @@ function RevealLine({
 export function FinalSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, { once: true, margin: "-100px" });
-  const [photos, setPhotos] = useState<string[]>(PLACEHOLDER_PHOTOS);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
