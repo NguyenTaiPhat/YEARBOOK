@@ -27,10 +27,10 @@ export function AboutSection() {
           transition={revealTransition}
         >
           <h2
-            className="text-4xl md:text-5xl text-[var(--text-primary)] mb-4"
+            className="text-4xl md:text-5xl lg:text-6xl text-[var(--text-primary)] font-bold mb-4"
             style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
           >
-            Reason For This Website
+            About
           </h2>
         </motion.div>
 
