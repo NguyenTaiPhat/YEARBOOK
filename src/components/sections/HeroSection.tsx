@@ -34,7 +34,7 @@ export function HeroSection() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="wall.jpg"
+            src="/wall.webp"
             alt="Background"
             className="w-full h-full object-cover"
           />
@@ -42,7 +42,8 @@ export function HeroSection() {
       </div>
 
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 z-10 hero-overlay opacity-75" />
+      <div className="absolute inset-0 z-10 bg-black/40" />
+      <div className="absolute inset-0 z-10 hero-overlay opacity-90" />
 
 
 
@@ -55,27 +56,27 @@ export function HeroSection() {
         >
           {/* Class badge */}
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 border border-[rgba(184,147,103,0.5)] bg-[rgba(184,147,103,0.15)] backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 border border-[rgba(184,147,103,0.6)] bg-black/30 backdrop-blur-md shadow-lg"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <span className="text-[var(--soft-gold)]">
+            <span className="text-[#E7D3BE]">
               <svg width="10" height="10" viewBox="0 0 14 14" fill="none" display="inline-block" style={{verticalAlign:'middle'}}><path d="M7 0L8.5 5.5H14L9.5 8.5L11 14L7 10.5L3 14L4.5 8.5L0 5.5H5.5L7 0Z" fill="currentColor"/></svg>
             </span>
-            <span className="text-[var(--soft-gold)] text-sm font-medium tracking-widest uppercase">
+            <span className="text-[#E7D3BE] text-sm font-semibold tracking-widest uppercase drop-shadow-sm">
               A19 KHÔNG 9 CŨNG 10
             </span>
           </motion.div>
 
           {/* Main title */}
           <motion.h1
-            className="font-playfair text-white mb-3"
+            className="font-playfair text-white mb-3 drop-shadow-2xl"
             style={{
               fontFamily: "var(--font-playfair), Georgia, serif",
               fontSize: isMobile ? "clamp(2.5rem, 10vw, 3.5rem)" : "clamp(3.5rem, 7vw, 6rem)",
               lineHeight: 1.1,
-              textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+              textShadow: "0 4px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5)",
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -86,7 +87,7 @@ export function HeroSection() {
 
           {/* Year */}
           <motion.p
-            className="text-[#C4B5A8] mb-2 tracking-[0.3em] text-sm md:text-base uppercase"
+            className="text-[#E7D3BE] mb-2 tracking-[0.3em] text-sm md:text-base uppercase font-semibold drop-shadow-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 1.1 }}
@@ -96,7 +97,7 @@ export function HeroSection() {
 
           {/* Name */}
           <motion.p
-            className="text-[var(--soft-gold)] mb-8 text-lg md:text-xl"
+            className="text-[var(--soft-gold)] mb-8 text-xl md:text-2xl drop-shadow-lg"
             style={{ fontFamily: "var(--font-handwriting), cursive" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -107,7 +108,7 @@ export function HeroSection() {
 
           {/* Quote */}
           <motion.blockquote
-            className="text-[#D4C5B5] text-base md:text-lg max-w-md mx-auto mb-10 leading-relaxed italic"
+            className="text-white text-base md:text-lg max-w-md mx-auto mb-10 leading-relaxed italic drop-shadow-lg font-medium"
             style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: isMobile ? "18px" : "22px" }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -123,7 +124,7 @@ export function HeroSection() {
       {/* Scroll indicator */}
       <motion.button
         onClick={scrollToContent}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-[#8A7A6A] hover:text-[var(--soft-gold)] transition-colors cursor-pointer"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-[#C4B5A8] hover:text-white transition-colors cursor-pointer drop-shadow-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.2 }}
