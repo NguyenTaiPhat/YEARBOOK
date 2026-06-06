@@ -1,18 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { ChevronDown, BookOpen, Star } from "@/components/ui/Icons";
 
 export function HeroSection() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   const scrollToContent = () => {
     document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" });
@@ -32,11 +24,12 @@ export function HeroSection() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/wall.jpg"
             alt="Background"
-            className="w-full h-full object-cover"
+            fill
+            priority
+            className="object-cover"
           />
         </motion.div>
       </div>
@@ -71,13 +64,8 @@ export function HeroSection() {
 
           {/* Main title */}
           <motion.h1
-            className="font-playfair text-white mb-3 drop-shadow-2xl"
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: isMobile ? "clamp(2.5rem, 10vw, 3.5rem)" : "clamp(3.5rem, 7vw, 6rem)",
-              lineHeight: 1.1,
-              textShadow: "0 4px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5)",
-            }}
+            className="font-playfair text-white mb-3 drop-shadow-2xl text-[clamp(2.5rem,8vw,6rem)] leading-[1.1]"
+            style={{ textShadow: "0 4px 30px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5)" }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.8 }}
@@ -97,8 +85,8 @@ export function HeroSection() {
 
           {/* Name */}
           <motion.p
-            className="text-[var(--soft-gold)] mb-8 text-xl md:text-2xl drop-shadow-lg"
-            style={{ fontFamily: "var(--font-handwriting), cursive" }}
+            className="mb-8 text-4xl md:text-5xl text-[#FFEBC2] font-handwriting"
+            style={{ textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(184,147,103,0.5)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 1.2 }}
@@ -108,8 +96,7 @@ export function HeroSection() {
 
           {/* Quote */}
           <motion.blockquote
-            className="text-white text-base md:text-lg max-w-md mx-auto mb-10 leading-relaxed italic drop-shadow-lg font-medium"
-            style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: isMobile ? "18px" : "22px" }}
+            className="text-white text-lg md:text-xl lg:text-2xl max-w-md mx-auto mb-10 leading-relaxed italic drop-shadow-lg font-medium font-handwriting"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1.4 }}
