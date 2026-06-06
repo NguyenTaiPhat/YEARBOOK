@@ -30,7 +30,7 @@ export function AboutSection() {
             className="text-4xl md:text-5xl text-[var(--text-primary)] mb-4"
             style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
           >
-            Lý do có trang web này
+            Reason For This Website
           </h2>
         </motion.div>
 
