@@ -34,7 +34,7 @@ export function HeroSection() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/public/wall.jpg"
+            src="wall.jpg"
             alt="Background"
             className="w-full h-full object-cover"
           />
