@@ -134,7 +134,27 @@ export async function POST(request: Request) {
       if (userData) {
         user_id = userData.id;
         avatar_url = userData.avatar_url;
+      } else {
+        const { data: createdUser, error: createUserError } = await supabase
+          .from("users")
+          .insert({
+            name: author_name,
+            avatar_url: null,
+            visitor_identifier,
+          })
+          .select()
+          .single();
 
+        if (createUserError) {
+          return NextResponse.json({ error: createUserError.message }, { status: 500 });
+        }
+
+        if (createdUser) {
+          user_id = createdUser.id;
+        }
+      }
+
+      if (user_id) {
         const { data: existingMessages, error: existingError } = await supabase
           .from("messages")
           .select("id")
