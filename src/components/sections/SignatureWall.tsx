@@ -83,7 +83,7 @@ function SignatureItem({
   return (
     <motion.div
       className="absolute group select-none signature-item"
-      style={{ left: `${sig.position_x}%`, top: `${sig.position_y}%` }}
+      style={{ left: sig.position_x + "%", top: sig.position_y + "%" }}
       initial={{ opacity: 0, scale: 0.7 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
@@ -91,15 +91,16 @@ function SignatureItem({
       whileHover={{ scale: 1.1, zIndex: 20 }}
     >
       <div
-        style={{ rotate: `${tilt}deg` }}
-        className={`relative cursor-default max-w-[140px] rounded-md px-1 py-0.5 md:max-w-none ${
-          isEditing ? "bg-[var(--soft-gold)]/10 ring-1 ring-[var(--soft-gold)]/35" : ""
-        }`}
+        style={{ rotate: tilt + "deg" }}
+        className={
+          "relative cursor-default max-w-[140px] rounded-md px-1 py-0.5 md:max-w-none " +
+          (isEditing ? "bg-[var(--soft-gold)]/10 ring-1 ring-[var(--soft-gold)]/35" : "")
+        }
       >
         <p
           style={{
             fontFamily: "var(--font-handwriting), cursive",
-            fontSize: `${fontSize}px`,
+            fontSize: fontSize + "px",
             fontWeight: 400,
             color: textColor,
             lineHeight: 1.3,
@@ -114,7 +115,7 @@ function SignatureItem({
           <p
             style={{
               fontFamily: "var(--font-handwriting), cursive",
-              fontSize: `${fontSize * 0.75}px`,
+              fontSize: fontSize * 0.75 + "px",
               fontWeight: 400,
               color: textColor,
               opacity: 0.75,
@@ -484,7 +485,7 @@ export function SignatureWall() {
           {/* Grid lines like ruled paper */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="absolute w-full h-px bg-[var(--soft-gold)]" style={{ top: `${(i + 1) * 10}%` }} />
+              <div key={i} className="absolute w-full h-px bg-[var(--soft-gold)]" style={{ top: (i + 1) * 10 + "%" }} />
             ))}
           </div>
 
@@ -570,12 +571,14 @@ export function SignatureWall() {
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-8 h-8 md:w-9 md:h-9 rounded-full transition-all border-2 ${color === c
-                    ? "scale-110 border-[var(--soft-gold)] shadow-md"
-                    : "border-transparent hover:scale-105 hover:border-[var(--border-warm)]"
-                    }`}
+                  className={
+                    "w-8 h-8 md:w-9 md:h-9 rounded-full transition-all border-2 " +
+                    (color === c
+                      ? "scale-110 border-[var(--soft-gold)] shadow-md"
+                      : "border-transparent hover:scale-105 hover:border-[var(--border-warm)]")
+                  }
                   style={{ background: c }}
-                  aria-label={`Màu ${c}`}
+                  aria-label={"Màu " + c}
                 />
               ))}
             </div>
