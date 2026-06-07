@@ -56,6 +56,8 @@ function SignatureItem({
   isDark,
   densityScale,
   onEdit,
+  onDelete,
+  isDeleting,
 }: {
   sig: Signature;
   index: number;
@@ -64,6 +66,8 @@ function SignatureItem({
   isDark: boolean;
   densityScale: number;
   onEdit: (signature: Signature) => void;
+  onDelete: (signature: Signature) => void;
+  isDeleting: boolean;
 }) {
   const { fontSize, tilt } = useMemo(() => {
     const baseSize = isMobile ? stableRange(`${sig.id}-font`, 13, 17) : stableRange(`${sig.id}-font`, 18, 26);
@@ -123,14 +127,24 @@ function SignatureItem({
           </p>
         )}
         {sig.can_edit && (
-          <button
-            type="button"
-            onClick={() => onEdit(sig)}
-            className="absolute -right-9 -top-6 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-[var(--soft-gold)] opacity-100 shadow-md ring-1 ring-[var(--border-warm)] transition-all hover:-translate-y-0.5 hover:bg-white md:opacity-0 md:group-hover:opacity-100"
-            aria-label="Chỉnh sửa chữ ký"
-          >
-            <PenLine size={14} />
-          </button>
+          <div className="absolute -right-9 -top-6 flex gap-1 opacity-100 md:group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={() => onEdit(sig)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-[var(--soft-gold)] shadow-md ring-1 ring-[var(--border-warm)] transition-all hover:-translate-y-0.5 hover:bg-white"
+              aria-label="Chỉnh sửa chữ ký"
+            >
+              <PenLine size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(sig)}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-[#C44E4E] shadow-md ring-1 ring-[#C44E4E]/20 transition-all hover:-translate-y-0.5 hover:bg-white"
+              aria-label="Xóa chữ ký"
+            >
+              <X size={14} />
+            </button>
+          </div>
         )}
       </div>
     </motion.div>
@@ -147,6 +161,8 @@ export function SignatureWall() {
   const [done, setDone] = useState(false);
   const [editingSignatureId, setEditingSignatureId] = useState<string | null>(null);
   const [savingSignatureId, setSavingSignatureId] = useState<string | null>(null);
+  const [deletingSignatureId, setDeletingSignatureId] = useState<string | null>(null);
+  const [deleteConfirmSignatureId, setDeleteConfirmSignatureId] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // Fetch real signatures on mount
@@ -197,6 +213,8 @@ export function SignatureWall() {
     return Math.max(0.6, 1 - Math.min(0.4, (count - 10) * 0.02));
   }, [signatures.length]);
 
+  const pendingDeleteSignature = signatures.find((sig) => sig.id === deleteConfirmSignatureId) ?? null;
+
   const handleStartEdit = (signature: Signature) => {
     setEditingSignatureId(signature.id);
     setName(signature.author_name);
@@ -213,6 +231,53 @@ export function SignatureWall() {
     setName("");
     setNote("");
     setColor(DEFAULT_SIGNATURE_COLOR);
+  };
+
+  const handleDeleteSignature = (signature: Signature) => {
+    setDeleteConfirmSignatureId(signature.id);
+  };
+
+  const handleCancelDeleteSignature = () => {
+    setDeleteConfirmSignatureId(null);
+  };
+
+  const handleConfirmDeleteSignature = async () => {
+    if (!deleteConfirmSignatureId) return;
+
+    const signature = signatures.find((item) => item.id === deleteConfirmSignatureId);
+    if (!signature) {
+      setDeleteConfirmSignatureId(null);
+      return;
+    }
+
+    const previousSignatures = [...signatures];
+    setDeletingSignatureId(signature.id);
+    setSignatures((prev) => prev.filter((item) => item.id !== signature.id));
+    setEditingSignatureId((prev) => (prev === signature.id ? null : prev));
+    setDeleteConfirmSignatureId(null);
+
+    if (isLocalOnlyId(signature.id)) {
+      setDeletingSignatureId(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/signatures?id=${encodeURIComponent(signature.id)}&visitor_identifier=${encodeURIComponent(getVisitorId())}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete signature");
+      }
+    } catch (err) {
+      console.error("Failed to delete signature:", err);
+      setSignatures(previousSignatures);
+    } finally {
+      setDeletingSignatureId(null);
+    }
   };
 
   const handleUpdateSignature = async () => {
@@ -372,6 +437,35 @@ export function SignatureWall() {
         </motion.div>
 
         {/* Signature board */}
+        {deleteConfirmSignatureId && (
+          <div className="mb-6 rounded-2xl border border-[#C44E4E] bg-[#FFEAEA] p-5 text-sm text-[#5A1C1C] shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-[15px]">Xác nhận xóa chữ ký</p>
+                <p className="text-[13px] text-[#6E2A2A] mt-1">
+                  Bạn sắp xóa chữ ký của <span className="font-semibold text-[#3B3028]">{pendingDeleteSignature?.author_name ?? "bạn"}</span>. Hành động này sẽ xóa vĩnh viễn khỏi tường.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelDeleteSignature}
+                  className="rounded-full border border-[#C44E4E] bg-white px-4 py-2 text-sm font-semibold text-[#5A1C1C] transition hover:bg-[#FBE5E5]"
+                >
+                  Huỷ
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteSignature}
+                  disabled={deletingSignatureId === deleteConfirmSignatureId}
+                  className="rounded-full bg-[#C44E4E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#A11E1E] disabled:opacity-50"
+                >
+                  {deletingSignatureId === deleteConfirmSignatureId ? "Đang xóa..." : "Xóa ngay"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <motion.div
           className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-10 paper-texture"
           style={{
@@ -416,7 +510,9 @@ export function SignatureWall() {
               isDark={isDark}
               densityScale={densityScale}
               isEditing={editingSignatureId === sig.id}
+              isDeleting={deletingSignatureId === sig.id}
               onEdit={handleStartEdit}
+              onDelete={handleDeleteSignature}
             />
           ))}
         </motion.div>
@@ -507,6 +603,11 @@ export function SignatureWall() {
               Hủy chỉnh sửa
             </button>
           )}
+        </motion.form>
+      </div>
+    </section>
+  );
+}
         </motion.form>
       </div>
     </section>
