@@ -61,7 +61,9 @@ function StickyNote({
   isEditing,
   editContent,
   isSaving,
+  isDeleting,
   onEdit,
+  onDelete,
   onEditContentChange,
   onCancelEdit,
   onSaveEdit,
@@ -71,7 +73,9 @@ function StickyNote({
   isEditing: boolean;
   editContent: string;
   isSaving: boolean;
+  isDeleting: boolean;
   onEdit: (message: Message) => void;
+  onDelete: (message: Message) => void;
   onEditContentChange: (content: string) => void;
   onCancelEdit: () => void;
   onSaveEdit: (message: Message) => void;
@@ -142,7 +146,7 @@ function StickyNote({
         </span>
       </div>
       {message.can_edit && (
-        <div className="mt-3 flex justify-end gap-2">
+        <div className="mt-3 flex flex-wrap justify-end gap-2">
           {isEditing ? (
             <>
               <button
@@ -165,14 +169,24 @@ function StickyNote({
               </button>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={() => onEdit(message)}
-              className="inline-flex items-center gap-1 rounded-full bg-[#3B3028]/10 px-3 py-1.5 text-[11px] font-semibold text-[#7B6A5A] transition-colors hover:bg-[#3B3028]/15"
-            >
-              <PenLine size={12} />
-              Sửa
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => onEdit(message)}
+                className="inline-flex items-center gap-1 rounded-full bg-[#3B3028]/10 px-3 py-1.5 text-[11px] font-semibold text-[#7B6A5A] transition-colors hover:bg-[#3B3028]/15"
+              >
+                <PenLine size={12} />
+                Sửa
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(message)}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-1 rounded-full bg-[#B89367]/10 px-3 py-1.5 text-[11px] font-semibold text-[#B89367] transition-colors hover:bg-[#B89367]/15 disabled:opacity-50"
+              >
+                Xóa
+              </button>
+            </>
           )}
         </div>
       )}
@@ -189,6 +203,7 @@ export function MemoryWall() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [visibleNotes, setVisibleNotes] = useState(6);
   const titleRef = useRef(null);
 
@@ -284,6 +299,40 @@ export function MemoryWall() {
   const handleCancelEdit = () => {
     setEditingMessageId(null);
     setEditingContent("");
+  };
+
+  const handleDelete = async (message: Message) => {
+    if (!window.confirm("Bạn có chắc muốn xóa note này không?")) {
+      return;
+    }
+
+    const previousMessages = messages;
+    setDeletingMessageId(message.id);
+    setMessages((prev) => prev.filter((item) => item.id !== message.id));
+    setEditingMessageId((prev) => (prev === message.id ? null : prev));
+
+    if (isLocalOnlyId(message.id)) {
+      setDeletingMessageId(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/messages?id=${encodeURIComponent(message.id)}&visitor_identifier=${encodeURIComponent(getVisitorId())}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete message");
+      }
+    } catch (err) {
+      console.error("Failed to delete note:", err);
+      setMessages(previousMessages);
+    } finally {
+      setDeletingMessageId(null);
+    }
   };
 
   const handleSaveEdit = async (message: Message) => {
@@ -442,7 +491,9 @@ export function MemoryWall() {
                   isEditing={editingMessageId === msg.id}
                   editContent={editingMessageId === msg.id ? editingContent : ""}
                   isSaving={savingMessageId === msg.id}
+                  isDeleting={deletingMessageId === msg.id}
                   onEdit={handleStartEdit}
+                  onDelete={handleDelete}
                   onEditContentChange={setEditingContent}
                   onCancelEdit={handleCancelEdit}
                   onSaveEdit={handleSaveEdit}
