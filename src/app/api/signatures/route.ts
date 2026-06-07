@@ -110,14 +110,36 @@ export async function POST(request: Request) {
     let user_id = null;
 
     if (visitor_identifier) {
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("id")
         .eq("visitor_identifier", visitor_identifier)
         .maybeSingle();
-      
+
+      if (userError) {
+        return NextResponse.json({ error: userError.message }, { status: 500 });
+      }
+
       if (userData) {
         user_id = userData.id;
+      } else {
+        const { data: createdUser, error: createUserError } = await supabase
+          .from("users")
+          .insert({
+            name: author_name,
+            avatar_url: null,
+            visitor_identifier,
+          })
+          .select()
+          .single();
+
+        if (createUserError) {
+          return NextResponse.json({ error: createUserError.message }, { status: 500 });
+        }
+
+        if (createdUser) {
+          user_id = createdUser.id;
+        }
       }
     }
 
@@ -139,6 +161,53 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ signature: data });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const visitorIdentifier = searchParams.get("visitor_identifier");
+
+    if (!id || !visitorIdentifier) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const supabase = createServerClient();
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("visitor_identifier", visitorIdentifier)
+      .maybeSingle();
+
+    if (userError) {
+      return NextResponse.json({ error: userError.message }, { status: 500 });
+    }
+
+    if (!userData) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { data, error } = await supabase
+      .from("signatures")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userData.id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Signature not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
