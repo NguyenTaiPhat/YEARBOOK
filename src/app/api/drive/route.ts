@@ -1,6 +1,6 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-
 export async function GET() {
   const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
   const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
@@ -31,9 +31,11 @@ export async function GET() {
 
   try {
     const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'image/'&key=${apiKey}&fields=files(id,name,thumbnailLink,webContentLink)&pageSize=100`;
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { cache: "no-store", });
     const data = await res.json();
-
+    console.log("Folder ID:", folderId);
+    console.log("Files found:", data.files?.length);
+    console.log("Drive response:", JSON.stringify(data, null, 2));
     if (!res.ok) {
       console.error("Google Drive API error:", data);
       return NextResponse.json({ photos: [] }, { status: 500 });
