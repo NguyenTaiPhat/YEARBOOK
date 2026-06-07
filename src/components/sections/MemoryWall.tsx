@@ -204,6 +204,7 @@ export function MemoryWall() {
   const [editingContent, setEditingContent] = useState("");
   const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
+  const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<string | null>(null);
   const [visibleNotes, setVisibleNotes] = useState(6);
   const titleRef = useRef(null);
 
@@ -233,6 +234,7 @@ export function MemoryWall() {
   }, []);
 
   const hasOwnNote = messages.some((msg) => msg.can_edit);
+  const pendingDeleteMessage = messages.find((msg) => msg.id === deleteConfirmMessageId) ?? null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -301,8 +303,20 @@ export function MemoryWall() {
     setEditingContent("");
   };
 
-  const handleDelete = async (message: Message) => {
-    if (!window.confirm("Bạn có chắc muốn xóa note này không?")) {
+  const handleDelete = (message: Message) => {
+    setDeleteConfirmMessageId(message.id);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmMessageId(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmMessageId) return;
+
+    const message = messages.find((item) => item.id === deleteConfirmMessageId);
+    if (!message) {
+      setDeleteConfirmMessageId(null);
       return;
     }
 
@@ -310,6 +324,7 @@ export function MemoryWall() {
     setDeletingMessageId(message.id);
     setMessages((prev) => prev.filter((item) => item.id !== message.id));
     setEditingMessageId((prev) => (prev === message.id ? null : prev));
+    setDeleteConfirmMessageId(null);
 
     if (isLocalOnlyId(message.id)) {
       setDeletingMessageId(null);
@@ -481,6 +496,35 @@ export function MemoryWall() {
         </motion.form>
 
         {/* Messages masonry */}
+        {deleteConfirmMessageId && (
+          <div className="mb-6 rounded-2xl border border-[#B89367] bg-[#FFF5D6] p-5 text-sm text-[#3B3028] shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-[15px]">Xác nhận xóa note</p>
+                <p className="text-[13px] text-[#5D4B37] mt-1">
+                  Bạn sắp xóa note của <span className="font-semibold text-[#3B3028]">{pendingDeleteMessage?.author_name ?? "người dùng"}</span>. Hành động này sẽ xóa note vĩnh viễn khỏi bảng.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelDelete}
+                  className="rounded-full border border-[#B89367] bg-white px-4 py-2 text-sm font-semibold text-[#3B3028] transition hover:bg-[#F7E3B3]"
+                >
+                  Huỷ
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={deletingMessageId === deleteConfirmMessageId}
+                  className="rounded-full bg-[#B89367] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#A07C58] disabled:opacity-50"
+                >
+                  {deletingMessageId === deleteConfirmMessageId ? "Đang xóa..." : "Xóa ngay"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
           <AnimatePresence>
             {messages.slice(0, visibleNotes).map((msg, i) => (
