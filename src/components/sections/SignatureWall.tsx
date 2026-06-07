@@ -54,19 +54,25 @@ function SignatureItem({
   isMobile,
   isEditing,
   isDark,
+  densityScale,
   onEdit,
 }: {
   sig: Signature;
   index: number;
   isMobile: boolean;
-  isDark: boolean;
   isEditing: boolean;
+  isDark: boolean;
+  densityScale: number;
   onEdit: (signature: Signature) => void;
 }) {
-  const { fontSize, tilt } = useMemo(() => ({
-    fontSize: isMobile ? stableRange(`${sig.id}-font`, 13, 17) : stableRange(`${sig.id}-font`, 18, 26),
-    tilt: stableRange(`${sig.id}-tilt`, -6, 6),
-  }), [sig.id, isMobile]);
+  const { fontSize, tilt } = useMemo(() => {
+    const baseSize = isMobile ? stableRange(`${sig.id}-font`, 13, 17) : stableRange(`${sig.id}-font`, 18, 26);
+    const scaled = Math.max(isMobile ? 10 : 14, baseSize * densityScale);
+    return {
+      fontSize: scaled,
+      tilt: stableRange(`${sig.id}-tilt`, -6, 6),
+    };
+  }, [sig.id, isMobile, densityScale]);
 
   const textColor = isDark ? darkenHex(sig.color, 0.82) : sig.color;
 
@@ -184,6 +190,12 @@ export function SignatureWall() {
   const boardBackground = isDark
     ? "linear-gradient(135deg, #F7E2A8 0%, #E5C16F 100%)"
     : "linear-gradient(135deg, #FFFEF8 0%, #FFF5E8 100%)";
+
+  const densityScale = useMemo(() => {
+    const count = signatures.length;
+    if (count <= 10) return 1;
+    return Math.max(0.6, 1 - Math.min(0.4, (count - 10) * 0.02));
+  }, [signatures.length]);
 
   const handleStartEdit = (signature: Signature) => {
     setEditingSignatureId(signature.id);
@@ -402,6 +414,7 @@ export function SignatureWall() {
               index={i}
               isMobile={isMobile}
               isDark={isDark}
+              densityScale={densityScale}
               isEditing={editingSignatureId === sig.id}
               onEdit={handleStartEdit}
             />
