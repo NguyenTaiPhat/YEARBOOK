@@ -76,8 +76,11 @@ function StickyNote({
   onCancelEdit: () => void;
   onSaveEdit: (message: Message) => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const color = STICKY_COLORS[index % STICKY_COLORS.length];
   const rotation = ((index * 7) % 9) - 4;
+  const isLong = message.content.length > 220;
+  const displayContent = expanded || !isLong ? message.content : `${message.content.slice(0, 220)}...`;
 
   return (
     <motion.div
@@ -98,21 +101,32 @@ function StickyNote({
           <textarea
             value={editContent}
             onChange={(event) => onEditContentChange(event.target.value)}
-            maxLength={300}
+            maxLength={1000}
             rows={4}
             className="w-full resize-none rounded-md border border-[#B89367]/35 bg-white/55 p-2 text-[#3B3028] outline-none focus:border-[#B89367]"
             style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(15px, 1.8vw, 17px)", lineHeight: 1.7 }}
             autoFocus
           />
-          <div className="mt-1 text-right text-[10px] text-[#7B6A5A]">{editContent.length}/300</div>
+          <div className="mt-1 text-right text-[10px] text-[#7B6A5A]">{editContent.length}/1000</div>
         </div>
       ) : (
-        <p
-          className="text-[#3B3028] leading-relaxed mb-3"
-          style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(15px, 1.8vw, 17px)", lineHeight: 1.7 }}
-        >
-          {message.content}
-        </p>
+        <>
+          <p
+            className="text-[#3B3028] leading-relaxed mb-3 overflow-hidden text-ellipsis"
+            style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(15px, 1.8vw, 17px)", lineHeight: 1.7, maxHeight: expanded ? undefined : "8.5rem" }}
+          >
+            {displayContent}
+          </p>
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#7B6A5A] transition-colors hover:text-[#3B3028]"
+            >
+              {expanded ? "Thu gọn" : "Xem thêm"}
+            </button>
+          )}
+        </>
       )}
       <div className="flex items-center justify-between border-t border-[#3b3028] border-opacity-10 pt-3 mt-2">
         <div className="flex items-center gap-2 max-w-[70%]">
@@ -380,14 +394,14 @@ export function MemoryWall() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Hãy nói điều bạn muốn chúng ta nhớ mãi mãi..."
-              maxLength={300}
+              maxLength={1000}
               rows={3}
               required
               className="w-full px-4 py-3 rounded-xl border border-[var(--border-warm)] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--warm-sand)] focus:outline-none focus:border-[var(--soft-gold)] transition-colors resize-none"
               style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(16px, 2vw, 18px)" }}
               id="memory-wall-content"
             />
-            <div className="text-right text-xs text-[var(--text-secondary)] mt-1">{content.length}/300</div>
+            <div className="text-right text-xs text-[var(--text-secondary)] mt-1">{content.length}/1000</div>
           </div>
 
           <motion.button
