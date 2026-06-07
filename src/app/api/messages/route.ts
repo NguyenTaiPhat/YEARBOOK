@@ -107,20 +107,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const trimmedContent = typeof content === "string" ? content.trim() : "";
+    if (!trimmedContent) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (trimmedContent.length > 1000) {
+      return NextResponse.json({ error: "Message is too long" }, { status: 400 });
+    }
+
     const supabase = createServerClient();
     let user_id = null;
     let avatar_url = null;
 
     if (visitor_identifier) {
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("id, avatar_url")
         .eq("visitor_identifier", visitor_identifier)
         .maybeSingle();
-      
+
+      if (userError) {
+        return NextResponse.json({ error: userError.message }, { status: 500 });
+      }
+
       if (userData) {
         user_id = userData.id;
         avatar_url = userData.avatar_url;
+
+        const { data: existingMessages, error: existingError } = await supabase
+          .from("messages")
+          .select("id")
+          .eq("user_id", user_id)
+          .limit(1);
+
+        if (existingError) {
+          return NextResponse.json({ error: existingError.message }, { status: 500 });
+        }
+
+        if (existingMessages && existingMessages.length > 0) {
+          return NextResponse.json({ error: "Bạn chỉ được gửi 1 note" }, { status: 400 });
+        }
       }
     }
 
@@ -128,7 +155,7 @@ export async function POST(request: Request) {
       .from("messages")
       .insert({
         author_name,
-        content,
+        content: trimmedContent,
         user_id,
       })
       .select()
@@ -144,6 +171,53 @@ export async function POST(request: Request) {
         avatar_url,
       }
     });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const visitorIdentifier = searchParams.get("visitor_identifier");
+
+    if (!id || !visitorIdentifier) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const supabase = createServerClient();
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("visitor_identifier", visitorIdentifier)
+      .maybeSingle();
+
+    if (userError) {
+      return NextResponse.json({ error: userError.message }, { status: 500 });
+    }
+
+    if (!userData) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    const { data, error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userData.id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Message not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
