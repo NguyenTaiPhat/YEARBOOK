@@ -139,7 +139,8 @@ function SignatureItem({
             <button
               type="button"
               onClick={() => onDelete(sig)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-[#C44E4E] shadow-md ring-1 ring-[#C44E4E]/20 transition-all hover:-translate-y-0.5 hover:bg-white"
+              disabled={isDeleting}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-[#C44E4E] shadow-md ring-1 ring-[#C44E4E]/20 transition-all hover:-translate-y-0.5 hover:bg-white disabled:opacity-50"
               aria-label="Xóa chữ ký"
             >
               <X size={14} />
@@ -603,11 +604,6 @@ export function SignatureWall() {
               Hủy chỉnh sửa
             </button>
           )}
-        </motion.form>
-      </div>
-    </section>
-  );
-}
         </motion.form>
       </div>
     </section>
