@@ -79,8 +79,9 @@ function StickyNote({
   const [expanded, setExpanded] = useState(false);
   const color = STICKY_COLORS[index % STICKY_COLORS.length];
   const rotation = ((index * 7) % 9) - 4;
-  const isLong = message.content.length > 220;
-  const displayContent = expanded || !isLong ? message.content : `${message.content.slice(0, 220)}...`;
+  const previewLength = 150;
+  const isLong = message.content.length > previewLength;
+  const displayContent = expanded || !isLong ? message.content : `${message.content.slice(0, previewLength)}...`;
 
   return (
     <motion.div
@@ -117,15 +118,13 @@ function StickyNote({
           >
             {displayContent}
           </p>
-          {isLong && (
-            <button
-              type="button"
-              onClick={() => setExpanded((prev) => !prev)}
-              className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#7B6A5A] transition-colors hover:text-[#3B3028]"
-            >
-              {expanded ? "Thu gọn" : "Xem thêm"}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setExpanded((prev) => !prev)}
+            className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[#7B6A5A] transition-colors hover:text-[#3B3028]"
+          >
+            {expanded ? "Thu gọn" : "Xem note"}
+          </button>
         </>
       )}
       <div className="flex items-center justify-between border-t border-[#3b3028] border-opacity-10 pt-3 mt-2">
@@ -190,6 +189,7 @@ export function MemoryWall() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
+  const [visibleNotes, setVisibleNotes] = useState(6);
   const titleRef = useRef(null);
 
   // Fetch real messages on load
@@ -210,9 +210,18 @@ export function MemoryWall() {
       });
   }, []);
 
+  useEffect(() => {
+    const storedProfile = getStoredProfile();
+    if (storedProfile?.name) {
+      setName(storedProfile.name);
+    }
+  }, []);
+
+  const hasOwnNote = messages.some((msg) => msg.can_edit);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !content.trim()) return;
+    if (!name.trim() || !content.trim() || hasOwnNote) return;
     setSubmitting(true);
 
     const visitorId = getVisitorId();
@@ -381,7 +390,8 @@ export function MemoryWall() {
               placeholder="Tên của bạn..."
               maxLength={50}
               required
-              className="w-full px-4 py-3 rounded-xl border border-[var(--border-warm)] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--warm-sand)] focus:outline-none focus:border-[var(--soft-gold)] transition-colors"
+              disabled={hasOwnNote}
+              className="w-full px-4 py-3 rounded-xl border border-[var(--border-warm)] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--warm-sand)] focus:outline-none focus:border-[var(--soft-gold)] transition-colors disabled:cursor-not-allowed disabled:opacity-70"
               id="memory-wall-name"
             />
           </div>
@@ -406,20 +416,25 @@ export function MemoryWall() {
 
           <motion.button
             type="submit"
-            disabled={submitting || !name.trim() || !content.trim()}
+            disabled={submitting || !name.trim() || !content.trim() || hasOwnNote}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--soft-gold)] text-white font-medium disabled:opacity-40 hover:bg-[#A07C58] transition-colors"
-            whileTap={name.trim() && content.trim() ? { scale: 0.97 } : {}}
+            whileTap={name.trim() && content.trim() && !hasOwnNote ? { scale: 0.97 } : {}}
             id="memory-wall-submit"
           >
             <Send size={16} />
-            {submitting ? "Đang gửi..." : submitted ? "Đã gửi!" : "Gửi Lời Nhắn"}
+            {hasOwnNote ? "Bạn đã gửi note rồi" : submitting ? "Đang gửi..." : submitted ? "Đã gửi!" : "Gửi Lời Nhắn"}
           </motion.button>
+          {hasOwnNote && (
+            <div className="mt-4 rounded-2xl border border-[var(--border-warm)] bg-[var(--bg-card)] p-4 text-sm text-[var(--text-secondary)]">
+              Bạn chỉ được đăng 1 note. Nếu cần chỉnh sửa, hãy dùng nút Sửa trên note của bạn.
+            </div>
+          )}
         </motion.form>
 
         {/* Messages masonry */}
         <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
           <AnimatePresence>
-            {messages.map((msg, i) => (
+            {messages.slice(0, visibleNotes).map((msg, i) => (
               <div key={msg.id} className="break-inside-avoid">
                 <StickyNote
                   message={msg}
@@ -435,6 +450,17 @@ export function MemoryWall() {
               </div>
             ))}
           </AnimatePresence>
+          {messages.length > visibleNotes && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => setVisibleNotes((prev) => prev + 6)}
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-warm)] bg-[var(--bg-card)] px-5 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:border-[var(--soft-gold)] hover:text-[var(--soft-gold)]"
+              >
+                Xem thêm {Math.min(messages.length - visibleNotes, 6)} note
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>
