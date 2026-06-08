@@ -79,8 +79,14 @@ export const SIGNATURE_COLORS = [
 export const STICKY_COLORS = [
   { bg: "#FFF9C4", border: "#F0D060" },
   { bg: "#FFE4CC", border: "#F0B070" },
+  { bg: "#F8BBD0", border: "#E090A8" },
   { bg: "#E8F5E9", border: "#90C090" },
   { bg: "#E3F2FD", border: "#90B8D0" },
   { bg: "#F3E5F5", border: "#C090C0" },
   { bg: "#FFF8F1", border: "#E7D3BE" },
+  { bg: "#FFE5EC", border: "#D8A2B2" },
+  { bg: "#D1C4E9", border: "#A78FC1" },
+  { bg: "#C8E6C9", border: "#88B37D" },
+  { bg: "#FFF3E0", border: "#E1B36F" },
+  { bg: "#E1F5FE", border: "#8AC2DC" },
 ];
