@@ -20,6 +20,7 @@ interface Message {
   id: string;
   author_name: string;
   content: string;
+  color?: string | null;
   created_at: string;
   avatar_url?: string | null;
   can_edit?: boolean;
@@ -60,11 +61,13 @@ function StickyNote({
   index,
   isEditing,
   editContent,
+  editingColor,
   isSaving,
   isDeleting,
   onEdit,
   onDelete,
   onEditContentChange,
+  onEditColorChange,
   onCancelEdit,
   onSaveEdit,
 }: {
@@ -72,16 +75,18 @@ function StickyNote({
   index: number;
   isEditing: boolean;
   editContent: string;
+  editingColor: string;
   isSaving: boolean;
   isDeleting: boolean;
   onEdit: (message: Message) => void;
   onDelete: (message: Message) => void;
   onEditContentChange: (content: string) => void;
+  onEditColorChange: (color: string) => void;
   onCancelEdit: () => void;
   onSaveEdit: (message: Message) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const color = STICKY_COLORS[index % STICKY_COLORS.length];
+  const color = STICKY_COLORS.find((sticky) => sticky.bg === message.color) ?? STICKY_COLORS[index % STICKY_COLORS.length];
   const rotation = ((index * 7) % 9) - 4;
   const previewLength = 150;
   const isLong = message.content.length > previewLength;
@@ -112,7 +117,24 @@ function StickyNote({
             style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(15px, 1.8vw, 17px)", lineHeight: 1.7 }}
             autoFocus
           />
-          <div className="mt-1 text-right text-[10px] text-[#7B6A5A]">{editContent.length}/1000</div>
+          <div className="mt-3 flex items-center justify-between gap-3 text-[10px] text-[#7B6A5A]">
+            <div className="flex items-center gap-2">
+              <span className="uppercase tracking-[0.18em]">Màu note:</span>
+              <div className="flex items-center gap-2">
+                {STICKY_COLORS.map((sticky) => (
+                  <button
+                    key={sticky.bg}
+                    type="button"
+                    onClick={() => onEditColorChange(sticky.bg)}
+                    className={`h-7 w-7 rounded-full border ${editingColor === sticky.bg ? "border-[#3B3028] ring-2 ring-[#3B3028]" : "border-[#B89367]/20"}`}
+                    style={{ background: sticky.bg }}
+                    aria-label={`Chọn màu note ${sticky.bg}`}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>{editContent.length}/1000</div>
+          </div>
         </div>
       ) : (
         <>
@@ -198,10 +220,12 @@ export function MemoryWall() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
+  const [selectedColor, setSelectedColor] = useState(STICKY_COLORS[0].bg);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
+  const [editingColor, setEditingColor] = useState(STICKY_COLORS[0].bg);
   const [savingMessageId, setSavingMessageId] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<string | null>(null);
@@ -250,6 +274,7 @@ export function MemoryWall() {
       id: localId,
       author_name: name.trim(),
       content: content.trim(),
+      color: selectedColor,
       created_at: new Date().toISOString(),
       avatar_url: localAvatarUrl,
       can_edit: true,
@@ -270,6 +295,7 @@ export function MemoryWall() {
         body: JSON.stringify({
           author_name: newMsg.author_name,
           content: newMsg.content,
+          color: newMsg.color,
           visitor_identifier: visitorId,
         }),
       });
@@ -296,11 +322,13 @@ export function MemoryWall() {
   const handleStartEdit = (message: Message) => {
     setEditingMessageId(message.id);
     setEditingContent(message.content);
+    setEditingColor(message.color || STICKY_COLORS[0].bg);
   };
 
   const handleCancelEdit = () => {
     setEditingMessageId(null);
     setEditingContent("");
+    setEditingColor(STICKY_COLORS[0].bg);
   };
 
   const handleDelete = (message: Message) => {
@@ -355,9 +383,12 @@ export function MemoryWall() {
     if (!nextContent) return;
 
     const previousContent = message.content;
+    const previousColor = message.color;
     setSavingMessageId(message.id);
     setMessages((prev) =>
-      prev.map((item) => (item.id === message.id ? { ...item, content: nextContent } : item))
+      prev.map((item) =>
+        item.id === message.id ? { ...item, content: nextContent, color: editingColor } : item
+      )
     );
 
     if (isLocalOnlyId(message.id)) {
@@ -373,6 +404,7 @@ export function MemoryWall() {
         body: JSON.stringify({
           id: message.id,
           content: nextContent,
+          color: editingColor,
           visitor_identifier: getVisitorId(),
         }),
       });
@@ -392,7 +424,9 @@ export function MemoryWall() {
       handleCancelEdit();
     } catch (err) {
       setMessages((prev) =>
-        prev.map((item) => (item.id === message.id ? { ...item, content: previousContent } : item))
+        prev.map((item) =>
+          item.id === message.id ? { ...item, content: previousContent, color: previousColor } : item
+        )
       );
       console.error("Failed to update memory:", err);
     } finally {
@@ -475,6 +509,21 @@ export function MemoryWall() {
               style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(16px, 2vw, 18px)" }}
               id="memory-wall-content"
             />
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wide font-medium">Chọn màu note</span>
+              <div className="flex items-center gap-2">
+                {STICKY_COLORS.map((sticky) => (
+                  <button
+                    key={sticky.bg}
+                    type="button"
+                    onClick={() => setSelectedColor(sticky.bg)}
+                    className={`h-8 w-8 rounded-full border transition ${selectedColor === sticky.bg ? "border-[#3B3028] ring-2 ring-[#3B3028]" : "border-[#B89367]/20"}`}
+                    style={{ background: sticky.bg }}
+                    aria-label={`Chọn màu note ${sticky.bg}`}
+                  />
+                ))}
+              </div>
+            </div>
             <div className="text-right text-xs text-[var(--text-secondary)] mt-1">{content.length}/1000</div>
           </div>
 
@@ -534,11 +583,13 @@ export function MemoryWall() {
                   index={i}
                   isEditing={editingMessageId === msg.id}
                   editContent={editingMessageId === msg.id ? editingContent : ""}
+                  editingColor={editingColor}
                   isSaving={savingMessageId === msg.id}
                   isDeleting={deletingMessageId === msg.id}
                   onEdit={handleStartEdit}
                   onDelete={handleDelete}
                   onEditContentChange={setEditingContent}
+                  onEditColorChange={setEditingColor}
                   onCancelEdit={handleCancelEdit}
                   onSaveEdit={handleSaveEdit}
                 />
