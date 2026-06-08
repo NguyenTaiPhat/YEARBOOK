@@ -17,6 +17,7 @@ import { FinalSection } from "@/components/sections/FinalSection";
 
 export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [profile, setProfile] = useState<{
     name: string;
     avatar_url: string | null;
@@ -42,6 +43,17 @@ export default function Home() {
     setShowOnboarding(false);
   };
 
+  const handleProfileEditorOpen = () => setShowProfileEditor(true);
+  const handleProfileEditorClose = () => setShowProfileEditor(false);
+  const handleProfileUpdated = (p: {
+    name: string;
+    avatar_url: string | null;
+    memory_message: string | null;
+  }) => {
+    setProfile(p);
+    setShowProfileEditor(false);
+  };
+
   // Don't render until we know onboarding status (prevents flash)
   if (showOnboarding === null) {
     return (
@@ -58,12 +70,19 @@ export default function Home() {
         {showOnboarding && (
           <OnboardingScreen onComplete={handleOnboardingComplete} />
         )}
+        {showProfileEditor && (
+          <OnboardingScreen
+            onComplete={handleProfileUpdated}
+            initialProfile={profile ?? undefined}
+            mode="edit"
+          />
+        )}
       </AnimatePresence>
 
       {/* Main website (always mounted, shown after onboarding) */}
       {!showOnboarding && (
         <>
-          <Navbar />
+          <Navbar onEditProfile={handleProfileEditorOpen} />
 
           {/* 1. Hero */}
           <HeroSection />
@@ -78,7 +97,7 @@ export default function Home() {
           <GallerySection />
 
           {/* 5. Memory Wall */}
-          <MemoryWall />
+          <MemoryWall profile={profile} />
 
           {/* 6. Signature Wall */}
           <SignatureWall />
