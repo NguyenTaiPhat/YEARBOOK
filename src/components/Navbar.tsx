@@ -112,7 +112,7 @@ function QRModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function Navbar() {
+export function Navbar({ onEditProfile }: { onEditProfile?: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
@@ -167,6 +167,15 @@ export function Navbar() {
 
           {/* Controls */}
           <div className="flex items-center gap-2">
+            {onEditProfile && (
+              <button
+                type="button"
+                onClick={onEditProfile}
+                className="hidden lg:inline-flex items-center rounded-full border border-[var(--border-warm)] bg-[var(--bg-card)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--soft-gold)] hover:text-[var(--text-primary)]"
+              >
+                Chỉnh sửa hồ sơ
+              </button>
+            )}
             <motion.button
               onClick={() => setQrOpen(true)}
               className="w-10 h-10 rounded-full border border-[var(--border-warm)] bg-[var(--bg-card)] bg-opacity-80 flex items-center justify-center hover:border-[var(--soft-gold)] transition-colors"
@@ -233,6 +242,19 @@ export function Navbar() {
                     {link.label}
                   </button>
                 ))}
+                {onEditProfile && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onEditProfile();
+                      setMobileOpen(false);
+                    }}
+                    className="text-left text-base text-[var(--text-primary)] hover:text-[var(--soft-gold)] transition-colors font-medium tracking-wide"
+                    style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
+                  >
+                    Chỉnh sửa hồ sơ
+                  </button>
+                )}
               </div>
             </motion.div>
           </motion.div>
