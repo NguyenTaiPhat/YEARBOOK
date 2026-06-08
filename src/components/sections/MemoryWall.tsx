@@ -121,7 +121,7 @@ function StickyNote({
             <div className="flex flex-wrap items-center gap-2 min-w-0">
               <span className="uppercase tracking-[0.18em]">Màu note:</span>
               <div className="flex flex-wrap items-center gap-2">
-                {STICKY_COLORS.map((sticky) => (
+                {visibleEditColors.map((sticky) => (
                   <button
                     key={sticky.bg}
                     type="button"
@@ -132,6 +132,15 @@ function StickyNote({
                   />
                 ))}
               </div>
+              {STICKY_COLORS.length > defaultVisibleColorCount && (
+                <button
+                  type="button"
+                  onClick={() => setShowMoreEditColors((prev) => !prev)}
+                  className="text-[10px] uppercase tracking-[0.18em] text-[#7B6A5A] transition hover:text-[#3B3028]"
+                >
+                  {showMoreEditColors ? "Thu gọn màu" : "Xem thêm màu"}
+                </button>
+              )}
             </div>
             <div className="w-full text-right sm:w-auto shrink-0">{editContent.length}/10000</div>
           </div>
@@ -230,7 +239,13 @@ export function MemoryWall() {
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(null);
   const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<string | null>(null);
   const [visibleNotes, setVisibleNotes] = useState(6);
+  const [showMoreColors, setShowMoreColors] = useState(false);
+  const [showMoreEditColors, setShowMoreEditColors] = useState(false);
   const titleRef = useRef(null);
+
+  const defaultVisibleColorCount = 6;
+  const visibleColors = showMoreColors ? STICKY_COLORS : STICKY_COLORS.slice(0, defaultVisibleColorCount);
+  const visibleEditColors = showMoreEditColors ? STICKY_COLORS : STICKY_COLORS.slice(0, defaultVisibleColorCount);
 
   // Fetch real messages on load
   useEffect(() => {
@@ -509,19 +524,30 @@ export function MemoryWall() {
               style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(16px, 2vw, 18px)" }}
               id="memory-wall-content"
             />
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wide font-medium">Chọn màu note</span>
-              <div className="flex items-center gap-2">
-                {STICKY_COLORS.map((sticky) => (
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs text-[var(--text-secondary)] uppercase tracking-wide font-medium">Chọn màu note</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {visibleColors.map((sticky) => (
+                    <button
+                      key={sticky.bg}
+                      type="button"
+                      onClick={() => setSelectedColor(sticky.bg)}
+                      className={`h-8 w-8 rounded-full border transition ${selectedColor === sticky.bg ? "border-[#3B3028] ring-2 ring-[#3B3028]" : "border-[#B89367]/20"}`}
+                      style={{ background: sticky.bg }}
+                      aria-label={`Chọn màu note ${sticky.bg}`}
+                    />
+                  ))}
+                </div>
+                {STICKY_COLORS.length > defaultVisibleColorCount && (
                   <button
-                    key={sticky.bg}
                     type="button"
-                    onClick={() => setSelectedColor(sticky.bg)}
-                    className={`h-8 w-8 rounded-full border transition ${selectedColor === sticky.bg ? "border-[#3B3028] ring-2 ring-[#3B3028]" : "border-[#B89367]/20"}`}
-                    style={{ background: sticky.bg }}
-                    aria-label={`Chọn màu note ${sticky.bg}`}
-                  />
-                ))}
+                    onClick={() => setShowMoreColors((prev) => !prev)}
+                    className="text-[10px] uppercase tracking-[0.18em] text-[#7B6A5A] transition hover:text-[#3B3028]"
+                  >
+                    {showMoreColors ? "Thu gọn màu" : "Xem thêm màu"}
+                  </button>
+                )}
               </div>
             </div>
             <div className="text-right text-xs text-[var(--text-secondary)] mt-1">{content.length}/10000</div>
