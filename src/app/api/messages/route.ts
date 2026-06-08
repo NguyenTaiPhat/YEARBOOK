@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { STICKY_COLORS } from "@/lib/utils";
 
 export async function GET(request: Request) {
   try {
@@ -12,6 +13,7 @@ export async function GET(request: Request) {
         id,
         author_name,
         content,
+        color,
         created_at,
         user_id,
         users (
@@ -29,6 +31,7 @@ export async function GET(request: Request) {
       id: msg.id,
       author_name: msg.author_name,
       content: msg.content,
+      color: msg.color || null,
       created_at: msg.created_at,
       user_id: msg.user_id,
       avatar_url: msg.users?.avatar_url || null,
@@ -44,15 +47,20 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { id, content, visitor_identifier } = body;
+    const { id, content, color, visitor_identifier } = body;
     const trimmedContent = typeof content === "string" ? content.trim() : "";
 
-    if (!id || !visitor_identifier || !trimmedContent) {
+    if (!id || !visitor_identifier || (!trimmedContent && typeof color !== "string")) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    if (trimmedContent.length > 1000) {
+    if (trimmedContent && trimmedContent.length > 1000) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
+    }
+
+    const allowedColors = STICKY_COLORS.map((item) => item.bg);
+    if (typeof color === "string" && !allowedColors.includes(color)) {
+      return NextResponse.json({ error: "Invalid color" }, { status: 400 });
     }
 
     const supabase = createServerClient();
@@ -70,9 +78,13 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    const updates: any = {};
+    if (trimmedContent) updates.content = trimmedContent;
+    if (typeof color === "string") updates.color = color;
+
     const { data, error } = await supabase
       .from("messages")
-      .update({ content: trimmedContent })
+      .update(updates)
       .eq("id", id)
       .eq("user_id", userData.id)
       .select()
@@ -101,7 +113,7 @@ export async function PATCH(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { author_name, content, visitor_identifier } = body;
+    const { author_name, content, color, visitor_identifier } = body;
 
     if (!author_name || !content) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -115,6 +127,9 @@ export async function POST(request: Request) {
     if (trimmedContent.length > 1000) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
     }
+
+    const allowedColors = STICKY_COLORS.map((item) => item.bg);
+    const nextColor = typeof color === "string" && allowedColors.includes(color) ? color : STICKY_COLORS[0].bg;
 
     const supabase = createServerClient();
     let user_id = null;
@@ -176,6 +191,7 @@ export async function POST(request: Request) {
       .insert({
         author_name,
         content: trimmedContent,
+        color: nextColor,
         user_id,
       })
       .select()
