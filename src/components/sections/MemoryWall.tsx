@@ -228,7 +228,11 @@ function StickyNote({
   );
 }
 
-export function MemoryWall() {
+export function MemoryWall({
+  profile,
+}: {
+  profile: { name: string; avatar_url: string | null; memory_message: string | null } | null;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
@@ -267,11 +271,16 @@ export function MemoryWall() {
   }, []);
 
   useEffect(() => {
+    if (profile?.name) {
+      setName(profile.name);
+      return;
+    }
+
     const storedProfile = getStoredProfile();
     if (storedProfile?.name) {
       setName(storedProfile.name);
     }
-  }, []);
+  }, [profile]);
 
   const hasOwnNote = messages.some((msg) => msg.can_edit);
   const pendingDeleteMessage = messages.find((msg) => msg.id === deleteConfirmMessageId) ?? null;
@@ -283,7 +292,7 @@ export function MemoryWall() {
 
     const visitorId = getVisitorId();
     const storedProfile = getStoredProfile();
-    const localAvatarUrl = storedProfile ? storedProfile.avatar_url : null;
+    const localAvatarUrl = profile?.avatar_url ?? (storedProfile ? storedProfile.avatar_url : null);
     const localId = `local-${Date.now()}`;
 
     const newMsg: Message = {
