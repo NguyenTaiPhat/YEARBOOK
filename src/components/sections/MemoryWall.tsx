@@ -117,10 +117,10 @@ function StickyNote({
             style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(15px, 1.8vw, 17px)", lineHeight: 1.7 }}
             autoFocus
           />
-          <div className="mt-3 flex items-center justify-between gap-3 text-[10px] text-[#7B6A5A]">
-            <div className="flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[10px] text-[#7B6A5A]">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <span className="uppercase tracking-[0.18em]">Màu note:</span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {STICKY_COLORS.map((sticky) => (
                   <button
                     key={sticky.bg}
@@ -133,7 +133,7 @@ function StickyNote({
                 ))}
               </div>
             </div>
-            <div>{editContent.length}/1000</div>
+            <div className="shrink-0">{editContent.length}/1000</div>
           </div>
         </div>
       ) : (
