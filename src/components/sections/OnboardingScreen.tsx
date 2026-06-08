@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Camera, CheckCircle, Star } from "@/components/ui/Icons";
 import { getVisitorId, markOnboardingComplete, storeProfile } from "@/lib/utils";
@@ -14,6 +14,8 @@ interface VisitorProfile {
 
 interface OnboardingScreenProps {
   onComplete: (profile: VisitorProfile) => void;
+  initialProfile?: VisitorProfile;
+  mode?: "onboarding" | "edit";
 }
 
 type Step = "book" | "form" | "success";
@@ -30,13 +32,21 @@ const smoothEase = [0.16, 1, 0.3, 1] as [number, number, number, number];
 const screenTransition = { duration: 0.82, ease: smoothEase };
 const panelSpring = { type: "spring" as const, stiffness: 96, damping: 24, mass: 0.85 };
 
-export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
-  const [step, setStep] = useState<Step>("book");
+export function OnboardingScreen({ onComplete, initialProfile, mode = "onboarding" }: OnboardingScreenProps) {
+  const [step, setStep] = useState<Step>(mode === "edit" ? "form" : "book");
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialProfile) {
+      setName(initialProfile.name);
+      setMessage(initialProfile.memory_message ?? "");
+      setAvatarPreview(initialProfile.avatar_url ?? null);
+    }
+  }, [initialProfile]);
 
   const initials = useMemo(() => {
     const trimmedName = name.trim();
@@ -263,13 +273,15 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                       className="text-3xl leading-tight md:text-4xl"
                       style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
                     >
-                      Trước khi vào kỷ yếu
+                      {mode === "edit" ? "Chỉnh sửa trang cá nhân" : "Trước khi vào kỷ yếu"}
                     </h2>
                     <p
                       className="mt-4 max-w-xs text-sm leading-7 text-[#D6C5B4]"
                       style={{ fontFamily: "var(--font-playfair), Georgia, serif" }}
                     >
-                      Một ngày nào đó, chúng ta sẽ quay lại đây và sống lại những ký ức này cùng nhau.
+                      {mode === "edit"
+                        ? "Cập nhật tên, avatar và lời nhắn để người khác nhận diện bạn dễ hơn."
+                        : "Một ngày nào đó, chúng ta sẽ quay lại đây và sống lại những ký ức này cùng nhau."}
                     </p>
                   </div>
 
@@ -384,7 +396,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                   whileTap={name.trim() && !loading ? { scale: 0.98 } : undefined}
                   id="enter-memory-book-btn"
                 >
-                  {loading ? "Đang lưu kỷ niệm..." : "Bước vào kỷ yếu"}
+                  {loading
+                    ? mode === "edit"
+                      ? "Đang lưu..."
+                      : "Đang lưu kỷ niệm..."
+                    : mode === "edit"
+                    ? "Lưu thay đổi"
+                    : "Bước vào kỷ yếu"}
                 </motion.button>
               </div>
             </motion.section>
