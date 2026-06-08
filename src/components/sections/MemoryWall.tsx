@@ -111,13 +111,13 @@ function StickyNote({
           <textarea
             value={editContent}
             onChange={(event) => onEditContentChange(event.target.value)}
-            maxLength={1000}
+            maxLength={10000}
             rows={4}
             className="w-full resize-none rounded-md border border-[#B89367]/35 bg-white/55 p-2 text-[#3B3028] outline-none focus:border-[#B89367]"
             style={{ fontFamily: "var(--font-handwriting), cursive", fontSize: "clamp(15px, 1.8vw, 17px)", lineHeight: 1.7 }}
             autoFocus
           />
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[10px] text-[#7B6A5A]">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[#7B6A5A]">
             <div className="flex flex-wrap items-center gap-2 min-w-0">
               <span className="uppercase tracking-[0.18em]">Màu note:</span>
               <div className="flex flex-wrap items-center gap-2">
@@ -133,7 +133,7 @@ function StickyNote({
                 ))}
               </div>
             </div>
-            <div className="shrink-0">{editContent.length}/1000</div>
+            <div className="w-full text-right sm:w-auto shrink-0">{editContent.length}/10000</div>
           </div>
         </div>
       ) : (
@@ -502,7 +502,7 @@ export function MemoryWall() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Hãy nói điều bạn muốn chúng ta nhớ mãi mãi..."
-              maxLength={1000}
+              maxLength={10000}
               rows={3}
               required
               className="w-full px-4 py-3 rounded-xl border border-[var(--border-warm)] bg-[var(--bg-card)] text-[var(--text-primary)] placeholder-[var(--warm-sand)] focus:outline-none focus:border-[var(--soft-gold)] transition-colors resize-none"
@@ -524,7 +524,7 @@ export function MemoryWall() {
                 ))}
               </div>
             </div>
-            <div className="text-right text-xs text-[var(--text-secondary)] mt-1">{content.length}/1000</div>
+            <div className="text-right text-xs text-[var(--text-secondary)] mt-1">{content.length}/10000</div>
           </div>
 
           <motion.button
