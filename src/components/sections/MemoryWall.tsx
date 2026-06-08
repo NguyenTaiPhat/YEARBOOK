@@ -86,6 +86,9 @@ function StickyNote({
   onSaveEdit: (message: Message) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [showMoreEditColors, setShowMoreEditColors] = useState(false);
+  const defaultVisibleColorCount = 6;
+  const visibleEditColors = showMoreEditColors ? STICKY_COLORS : STICKY_COLORS.slice(0, defaultVisibleColorCount);
   const color = STICKY_COLORS.find((sticky) => sticky.bg === message.color) ?? STICKY_COLORS[index % STICKY_COLORS.length];
   const rotation = ((index * 7) % 9) - 4;
   const previewLength = 150;
@@ -240,12 +243,10 @@ export function MemoryWall() {
   const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<string | null>(null);
   const [visibleNotes, setVisibleNotes] = useState(6);
   const [showMoreColors, setShowMoreColors] = useState(false);
-  const [showMoreEditColors, setShowMoreEditColors] = useState(false);
   const titleRef = useRef(null);
 
   const defaultVisibleColorCount = 6;
   const visibleColors = showMoreColors ? STICKY_COLORS : STICKY_COLORS.slice(0, defaultVisibleColorCount);
-  const visibleEditColors = showMoreEditColors ? STICKY_COLORS : STICKY_COLORS.slice(0, defaultVisibleColorCount);
 
   // Fetch real messages on load
   useEffect(() => {
