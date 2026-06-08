@@ -21,6 +21,7 @@ export interface Message {
   user_id: string | null;
   author_name: string;
   content: string;
+  color?: string | null;
   created_at: string;
 }
 
