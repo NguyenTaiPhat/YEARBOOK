@@ -54,7 +54,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    if (trimmedContent && trimmedContent.length > 1000) {
+    if (trimmedContent && trimmedContent.length > 10000) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
     }
 
@@ -124,7 +124,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    if (trimmedContent.length > 1000) {
+    if (trimmedContent.length > 10000) {
       return NextResponse.json({ error: "Message is too long" }, { status: 400 });
     }
 
